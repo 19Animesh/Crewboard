@@ -92,7 +92,7 @@ export default function LoginPage() {
 
           {/* Demo hints */}
           <div className="mt-6 p-3 bg-gray-800/50 rounded-lg border border-gray-700/50">
-            <p className="text-xs text-gray-500 mb-2 font-medium">Quick demo access:</p>
+            <p className="text-xs text-gray-500 mb-2 font-medium">Quick demo access (Case Sensitive!):</p>
             <button
               type="button"
               onClick={() => setForm({ email: 'admin@example.com', password: 'Admin@123' })}
