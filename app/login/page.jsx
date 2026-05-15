@@ -96,14 +96,14 @@ export default function LoginPage() {
             <button
               type="button"
               onClick={() => setForm({ email: 'admin@example.com', password: 'Admin@123' })}
-              className="text-xs text-indigo-400 hover:text-indigo-300 block mb-1"
+              className="text-xs text-indigo-400 hover:text-indigo-300 block mb-1 text-left w-full"
             >
               → Admin: admin@example.com / Admin@123
             </button>
             <button
               type="button"
               onClick={() => setForm({ email: 'member@example.com', password: 'Member@123' })}
-              className="text-xs text-indigo-400 hover:text-indigo-300 block"
+              className="text-xs text-indigo-400 hover:text-indigo-300 block text-left w-full"
             >
               → Member: member@example.com / Member@123
             </button>

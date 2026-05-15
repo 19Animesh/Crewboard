@@ -73,8 +73,8 @@ export default function ProjectsPage() {
                 {/* Meta */}
                 <div className="mt-auto pt-3 border-t border-gray-800 flex items-center justify-between text-xs text-gray-500">
                   <div className="flex items-center gap-3">
-                    <span>👥 {project.members?.length || 0} members</span>
-                    <span>📋 {project._count?.tasks || 0} tasks</span>
+                    <span>👥 {project.members?.length || 0} member{(project.members?.length || 0) !== 1 ? 's' : ''}</span>
+                    <span>📋 {project._count?.tasks || 0} task{(project._count?.tasks || 0) !== 1 ? 's' : ''}</span>
                   </div>
                   {project.deadline && (
                     <span className={new Date(project.deadline) < new Date() ? 'text-red-400' : ''}>

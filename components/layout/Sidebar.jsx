@@ -19,7 +19,7 @@ export default function Sidebar({ onClose }) {
   const filtered = navItems.filter(item => !item.roles || item.roles.includes(user?.role));
 
   return (
-    <div className="flex flex-col h-full bg-gray-900 border-r border-gray-800">
+    <div className="flex flex-col w-full h-full bg-gray-900 border-r border-gray-800">
       {/* Logo */}
       <div className="flex items-center gap-3 px-6 py-5 border-b border-gray-800">
         <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center text-white font-bold text-sm shadow-lg shadow-indigo-500/30">

@@ -110,7 +110,7 @@ export default function DashboardPage() {
                   <div>
                     <p className="text-sm font-medium text-gray-200">{project.title}</p>
                     <p className="text-xs text-gray-500 mt-0.5">
-                      {project._count?.members} members · {project._count?.tasks} tasks
+                      {project._count?.members || 0} member{(project._count?.members || 0) !== 1 ? 's' : ''} · {project._count?.tasks || 0} task{(project._count?.tasks || 0) !== 1 ? 's' : ''}
                     </p>
                   </div>
                   <StatusBadge status={project.status} />
