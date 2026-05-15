@@ -1,36 +1,92 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# CrewBoard
 
-## Getting Started
+A full-stack project management web application where users can create projects, manage team members, assign tasks, and track progress using role-based access control.
 
-First, run the development server:
+## 🚀 Features
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+*   **Authentication:** Secure signup/login using JWT and bcrypt.
+*   **Role-Based Access Control:**
+    *   **Admin:** Can create projects, add members by email, create tasks, assign tasks to project members, edit/delete any task in their project, and delete projects.
+    *   **Member:** Can view projects they are added to, view tasks assigned to them, and update the status of their own assigned tasks.
+*   **Project Management:** Create and track projects with deadlines and statuses (Active, On Hold, Completed).
+*   **Task Management:** Create tasks with priority (Low, Medium, High), status (Pending, In Progress, Completed), and due dates. Overdue tasks are automatically flagged.
+*   **Live Dashboard:** View role-specific statistics, recent tasks, and overdue items.
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## 🛠️ Tech Stack
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+*   **Frontend:** Next.js 14 (App Router), React, Tailwind CSS
+*   **Backend:** Next.js API Routes (REST APIs)
+*   **Database:** PostgreSQL
+*   **ORM:** Prisma
+*   **Authentication:** JSON Web Tokens (JWT) + bcryptjs
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## 💻 Running Locally
 
-## Learn More
+### Prerequisites
 
-To learn more about Next.js, take a look at the following resources:
+*   Node.js (v18+)
+*   PostgreSQL database (Local or Cloud like Railway)
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### Setup
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+1.  **Clone the repository** (if applicable) and navigate to the project directory:
+    ```bash
+    cd crewboard
+    ```
 
-## Deploy on Vercel
+2.  **Install dependencies:**
+    ```bash
+    npm install
+    ```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+3.  **Environment Variables:**
+    Copy the `.env.example` file to a new file named `.env`:
+    ```bash
+    cp .env.example .env
+    ```
+    Open the `.env` file and update the `DATABASE_URL` with your PostgreSQL connection string, and set a strong `JWT_SECRET`.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+4.  **Database Migration & Seeding:**
+    Run the following commands to create the database tables and seed it with demo data:
+    ```bash
+    npx prisma db push
+    npm run db:seed
+    ```
+
+5.  **Start the development server:**
+    ```bash
+    npm run dev
+    ```
+
+6.  **Access the app:**
+    Open your browser and navigate to `http://localhost:3000`
+
+## 🌍 Deployment on Railway
+
+1.  Create a Railway account at [railway.app](https://railway.app).
+2.  Create a new **PostgreSQL** service in a new project.
+3.  Connect your GitHub repository to Railway and deploy the `crewboard` code.
+4.  In the Railway project settings for your web app, go to the **Variables** tab and add:
+    *   `DATABASE_URL`: Set to `${{Postgres.DATABASE_URL}}` (Railway handles this reference automatically).
+    *   `JWT_SECRET`: Generate a random secure string.
+5.  Railway will automatically detect the Next.js project and the Prisma schema. The `npx prisma db push` will be needed, you can run this via Railway's custom build/start commands, or run `npx prisma db push` locally using the Railway provided connection string.
+6.  (Optional) Provide a `NEXT_PUBLIC_APP_URL` if needed.
+
+## 🔐 Demo Credentials
+
+Use these credentials to test the application after running the seed script:
+
+**Admin Account:**
+*   Email: `admin@example.com`
+*   Password: `Admin@123`
+
+**Member Account:**
+*   Email: `member@example.com`
+*   Password: `Member@123`
+
+## 🗣️ Presentation Points (Demo Script)
+
+*   **Problem Solved:** CrewBoard provides a clean, fast, and structured way for teams to collaborate without clutter. It ensures data privacy through strict role-based access.
+*   **Role Demo:** First, log in as an **Admin**. Show how to create a project, add a member (using `member@example.com`), and assign a task. Highlight the Admin dashboard stats.
+*   **Switching Roles:** Log out and log back in as the **Member**. Show how the view changes—the Member only sees their assigned projects and tasks, and the UI restricts them from creating new projects or changing other people's tasks.
+*   **Key Technical Highlight:** Emphasize the use of Next.js API Routes coupled with Prisma middleware to ensure that access control isn't just on the UI layer, but strictly enforced at the backend database level.
