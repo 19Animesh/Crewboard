@@ -25,7 +25,7 @@ export async function POST(request) {
     }
 
     // Sign JWT
-    const token = signToken({ id: user.id, name: user.name, email: user.email, role: user.role });
+    const token = await signToken({ id: user.id, name: user.name, email: user.email, role: user.role });
 
     // Create response with cookie
     const response = NextResponse.json({

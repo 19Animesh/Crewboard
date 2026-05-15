@@ -7,12 +7,12 @@ const protectedRoutes = ['/dashboard', '/projects', '/tasks'];
 // Routes that redirect to dashboard if already logged in
 const authRoutes = ['/login', '/signup'];
 
-export function middleware(request) {
+export async function middleware(request) {
   const { pathname } = request.nextUrl;
 
   // Get token from cookie
   const token = request.cookies.get(COOKIE_NAME)?.value;
-  const user = token ? verifyToken(token) : null;
+  const user = token ? await verifyToken(token) : null;
 
   // If accessing a protected route without a valid token, redirect to login
   const isProtected = protectedRoutes.some(route => pathname.startsWith(route));

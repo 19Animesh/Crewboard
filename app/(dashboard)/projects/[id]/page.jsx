@@ -11,7 +11,11 @@ import { PageLoader, EmptyState, AlertMessage } from '@/components/ui/Spinner';
 
 function formatDate(date) {
   if (!date) return '—';
-  return new Date(date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
+  try {
+    return new Date(date).toISOString().split('T')[0];
+  } catch {
+    return '—';
+  }
 }
 
 function isOverdue(task) {
@@ -55,10 +59,18 @@ export default function ProjectDetailPage() {
         body: JSON.stringify({ email: memberEmail }),
       });
       const data = await res.json();
-      if (!res.ok) setMemberError(data.error);
-      else { setMemberSuccess(data.message); setMemberEmail(''); fetchProject(); }
-    } catch { setMemberError('Network error.'); }
-    finally { setAddingMember(false); }
+      if (!res.ok) {
+        setMemberError(data.error || 'Failed to add member.');
+      } else {
+        setMemberSuccess(data.message);
+        setMemberEmail('');
+        await fetchProject();
+      }
+    } catch {
+      setMemberError('Network error. Please try again.');
+    } finally {
+      setAddingMember(false);
+    }
   };
 
   const handleRemoveMember = async (userId) => {

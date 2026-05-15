@@ -79,6 +79,7 @@ export default function SignupPage() {
               placeholder="John Doe"
               value={form.name}
               onChange={e => setForm(p => ({ ...p, name: e.target.value }))}
+              autoComplete="name"
               required
             />
             <Input
@@ -88,6 +89,7 @@ export default function SignupPage() {
               placeholder="you@example.com"
               value={form.email}
               onChange={e => setForm(p => ({ ...p, email: e.target.value }))}
+              autoComplete="email"
               required
             />
             <Input
@@ -97,6 +99,7 @@ export default function SignupPage() {
               placeholder="Min. 6 characters"
               value={form.password}
               onChange={e => setForm(p => ({ ...p, password: e.target.value }))}
+              autoComplete="new-password"
               required
             />
             <Select

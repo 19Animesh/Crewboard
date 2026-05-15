@@ -10,7 +10,11 @@ import { Button } from '@/components/ui/Button';
 
 function formatDate(date) {
   if (!date) return '—';
-  return new Date(date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
+  try {
+    return new Date(date).toISOString().split('T')[0];
+  } catch {
+    return '—';
+  }
 }
 
 function isOverdue(task) {
@@ -23,7 +27,7 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch('/api/dashboard/stats')
+    fetch('/api/dashboard/stats?t=' + Date.now(), { cache: 'no-store' })
       .then(r => r.json())
       .then(data => setStats(data))
       .finally(() => setLoading(false));

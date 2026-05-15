@@ -90,13 +90,21 @@ export async function POST(request) {
       }
     }
 
+    let validDueDate = null;
+    if (dueDate) {
+      validDueDate = new Date(dueDate);
+      if (isNaN(validDueDate.getTime())) {
+        return NextResponse.json({ error: 'Invalid due date format.' }, { status: 400 });
+      }
+    }
+
     const task = await prisma.task.create({
       data: {
         title: title.trim(),
         description: description?.trim() || null,
         status: status || 'PENDING',
         priority: priority || 'MEDIUM',
-        dueDate: new Date(dueDate),
+        dueDate: validDueDate,
         projectId,
         assignedToId: assignedToId || null,
         createdById: user.id,

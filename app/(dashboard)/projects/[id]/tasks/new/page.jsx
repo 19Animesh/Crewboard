@@ -39,10 +39,16 @@ export default function NewTaskPage() {
         body: JSON.stringify({ ...form, projectId }),
       });
       const data = await res.json();
-      if (!res.ok) setError(data.error || 'Failed to create task.');
-      else router.push(`/projects/${projectId}`);
-    } catch { setError('Network error.'); }
-    finally { setLoading(false); }
+      if (!res.ok) {
+        setError(data.error || 'Failed to create task.');
+        setLoading(false);
+      } else {
+        router.push(`/projects/${projectId}`);
+      }
+    } catch { 
+      setError('Network error.'); 
+      setLoading(false);
+    }
   };
 
   if (loadingMembers) return <PageLoader />;

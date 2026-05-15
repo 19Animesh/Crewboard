@@ -35,9 +35,14 @@ export function AuthProvider({ children }) {
   };
 
   const logout = async () => {
-    await fetch('/api/auth/logout', { method: 'POST' });
-    setUser(null);
-    router.push('/login');
+    try {
+      await fetch('/api/auth/logout', { method: 'POST' });
+    } catch (e) {
+      console.error('Logout error:', e);
+    } finally {
+      setUser(null);
+      window.location.href = '/login';
+    }
   };
 
   return (

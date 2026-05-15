@@ -59,11 +59,19 @@ export async function POST(request) {
       return NextResponse.json({ error: 'Project title is required.' }, { status: 400 });
     }
 
+    let validDeadline = null;
+    if (deadline) {
+      validDeadline = new Date(deadline);
+      if (isNaN(validDeadline.getTime())) {
+        return NextResponse.json({ error: 'Invalid date format for deadline.' }, { status: 400 });
+      }
+    }
+
     const project = await prisma.project.create({
       data: {
         title: title.trim(),
         description: description?.trim() || null,
-        deadline: deadline ? new Date(deadline) : null,
+        deadline: validDeadline,
         status: status || 'ACTIVE',
         createdById: user.id,
       },

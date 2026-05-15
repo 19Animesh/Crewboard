@@ -33,12 +33,13 @@ export default function NewProjectPage() {
 
       if (!res.ok) {
         setError(data.error || 'Failed to create project.');
+        setLoading(false);
       } else {
         router.push(`/projects/${data.project.id}`);
+        // Do not set loading to false here, so the spinner stays until navigation completes
       }
     } catch {
       setError('Network error. Please try again.');
-    } finally {
       setLoading(false);
     }
   };

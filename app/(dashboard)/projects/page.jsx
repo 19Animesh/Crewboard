@@ -9,7 +9,11 @@ import { PageLoader, EmptyState } from '@/components/ui/Spinner';
 
 function formatDate(date) {
   if (!date) return 'No deadline';
-  return new Date(date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
+  try {
+    return new Date(date).toISOString().split('T')[0];
+  } catch {
+    return 'No deadline';
+  }
 }
 
 export default function ProjectsPage() {
