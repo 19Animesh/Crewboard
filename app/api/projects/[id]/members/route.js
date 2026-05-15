@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { requireAuth } from '@/lib/apiMiddleware';
+import bcrypt from 'bcryptjs';
 
 // POST /api/projects/[id]/members - Add a member by email (Admin only)
 export async function POST(request, { params }) {
@@ -26,13 +27,29 @@ export async function POST(request, { params }) {
       return NextResponse.json({ error: 'You can only manage your own projects.' }, { status: 403 });
     }
 
-    // Find the user to add
-    const userToAdd = await prisma.user.findUnique({
+    // Find the user to add or create a new one
+    let userToAdd = await prisma.user.findUnique({
       where: { email: email.toLowerCase().trim() },
       select: { id: true, name: true, email: true, role: true },
     });
+
+    let isNewUser = false;
     if (!userToAdd) {
-      return NextResponse.json({ error: 'No user found with this email. They must sign up first.' }, { status: 404 });
+      const defaultPassword = 'Member@123';
+      const hashedPassword = await bcrypt.hash(defaultPassword, 10);
+      const emailPrefix = email.split('@')[0];
+      const defaultName = emailPrefix.charAt(0).toUpperCase() + emailPrefix.slice(1);
+
+      userToAdd = await prisma.user.create({
+        data: {
+          email: email.toLowerCase().trim(),
+          name: defaultName,
+          password: hashedPassword,
+          role: 'MEMBER',
+        },
+        select: { id: true, name: true, email: true, role: true },
+      });
+      isNewUser = true;
     }
 
     // Check if already a member
@@ -49,7 +66,9 @@ export async function POST(request, { params }) {
     });
 
     return NextResponse.json({
-      message: `${userToAdd.name} added to the project successfully.`,
+      message: isNewUser
+        ? `${userToAdd.name} was created with default password 'Member@123' and added to the project.`
+        : `${userToAdd.name} added to the project successfully.`,
       user: userToAdd,
     }, { status: 201 });
   } catch (err) {
