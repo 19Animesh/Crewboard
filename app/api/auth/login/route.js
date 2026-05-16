@@ -18,6 +18,12 @@ export async function POST(request) {
       return NextResponse.json({ error: 'Invalid email or password.' }, { status: 401 });
     }
 
+    // Check if email is verified (bypass for demo users)
+    const isDemoUser = user.email === 'admin@example.com' || user.email === 'member@example.com';
+    if (!user.emailVerified && !isDemoUser) {
+      return NextResponse.json({ error: 'Please verify your email before logging in.' }, { status: 403 });
+    }
+
     // Compare password
     const isValid = await bcrypt.compare(password, user.password);
     if (!isValid) {

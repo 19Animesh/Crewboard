@@ -1,7 +1,9 @@
 import { NextResponse } from 'next/server';
 import bcrypt from 'bcryptjs';
+import crypto from 'crypto';
 import { prisma } from '@/lib/prisma';
 import { signToken, setAuthCookie } from '@/lib/auth';
+import { sendVerificationEmail } from '@/lib/mail';
 
 export async function POST(request) {
   try {
@@ -27,6 +29,9 @@ export async function POST(request) {
     // Hash password
     const hashedPassword = await bcrypt.hash(password, 12);
 
+    // Generate verification token
+    const verificationToken = crypto.randomBytes(32).toString('hex');
+
     // Create user (only allow ADMIN role if explicitly passed; default is MEMBER)
     const userRole = role === 'ADMIN' ? 'ADMIN' : 'MEMBER';
     const user = await prisma.user.create({
@@ -35,18 +40,23 @@ export async function POST(request) {
         email: email.toLowerCase().trim(),
         password: hashedPassword,
         role: userRole,
+        verificationToken,
       },
       select: { id: true, name: true, email: true, role: true, createdAt: true },
     });
 
-    // Sign JWT
-    const token = await signToken({ id: user.id, name: user.name, email: user.email, role: user.role });
+    try {
+      await sendVerificationEmail(email.toLowerCase().trim(), verificationToken);
+    } catch (mailError) {
+      console.error('[SIGNUP EMAIL ERROR]', mailError);
+      // We still return success but maybe could alert user
+    }
 
-    // Create response and set cookie
-    const response = NextResponse.json({ message: 'Account created successfully.', user }, { status: 201 });
-    setAuthCookie(response, token);
-
-    return response;
+    // Do NOT log them in automatically. Tell them to verify email.
+    return NextResponse.json(
+      { message: 'Account created successfully. Please check your email to verify your account.' },
+      { status: 201 }
+    );
   } catch (error) {
     console.error('[SIGNUP ERROR]', error);
     return NextResponse.json({ error: 'Something went wrong. Please try again.' }, { status: 500 });
