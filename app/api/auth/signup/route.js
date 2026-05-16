@@ -1,9 +1,12 @@
 import { NextResponse } from 'next/server';
 import bcrypt from 'bcryptjs';
-import crypto from 'crypto';
 import { prisma } from '@/lib/prisma';
-import { signToken, setAuthCookie } from '@/lib/auth';
-import { sendVerificationEmail } from '@/lib/mail';
+import { sendOtpEmail } from '@/lib/mail';
+
+// Generate a 6-digit OTP
+function generateOtp() {
+  return Math.floor(100000 + Math.random() * 900000).toString();
+}
 
 export async function POST(request) {
   try {
@@ -20,41 +23,62 @@ export async function POST(request) {
       return NextResponse.json({ error: 'Password must be at least 6 characters.' }, { status: 400 });
     }
 
-    // Check if user already exists
+    // Check if user already exists and is verified
     const existingUser = await prisma.user.findUnique({ where: { email: email.toLowerCase() } });
-    if (existingUser) {
+    if (existingUser && existingUser.emailVerified) {
       return NextResponse.json({ error: 'An account with this email already exists.' }, { status: 409 });
     }
 
     // Hash password
     const hashedPassword = await bcrypt.hash(password, 12);
 
-    // Generate verification token
-    const verificationToken = crypto.randomBytes(32).toString('hex');
+    // Generate OTP (6 digits) and expiry (10 minutes)
+    const otp = generateOtp();
+    const otpExpiresAt = new Date(Date.now() + 10 * 60 * 1000);
 
-    // Create user (only allow ADMIN role if explicitly passed; default is MEMBER)
     const userRole = role === 'ADMIN' ? 'ADMIN' : 'MEMBER';
-    const user = await prisma.user.create({
-      data: {
-        name: name.trim(),
-        email: email.toLowerCase().trim(),
-        password: hashedPassword,
-        role: userRole,
-        verificationToken,
-      },
-      select: { id: true, name: true, email: true, role: true, createdAt: true },
-    });
 
-    try {
-      await sendVerificationEmail(email.toLowerCase().trim(), verificationToken);
-    } catch (mailError) {
-      console.error('[SIGNUP EMAIL ERROR]', mailError);
-      // We still return success but maybe could alert user
+    // Upsert: update if unverified account exists, create if new
+    if (existingUser) {
+      await prisma.user.update({
+        where: { email: email.toLowerCase() },
+        data: {
+          name: name.trim(),
+          password: hashedPassword,
+          role: userRole,
+          otpCode: otp,
+          otpExpiresAt,
+        },
+      });
+    } else {
+      await prisma.user.create({
+        data: {
+          name: name.trim(),
+          email: email.toLowerCase().trim(),
+          password: hashedPassword,
+          role: userRole,
+          otpCode: otp,
+          otpExpiresAt,
+        },
+      });
     }
 
-    // Do NOT log them in automatically. Tell them to verify email.
+    // Send OTP email
+    try {
+      await sendOtpEmail(email.toLowerCase().trim(), otp, name.trim());
+    } catch (mailError) {
+      console.error('[SIGNUP EMAIL ERROR]', mailError);
+      return NextResponse.json(
+        { error: 'Failed to send verification email. Please try again.' },
+        { status: 500 }
+      );
+    }
+
     return NextResponse.json(
-      { message: 'Account created successfully. Please check your email to verify your account.' },
+      {
+        message: 'OTP sent to your email. Please verify to complete signup.',
+        email: email.toLowerCase().trim(),
+      },
       { status: 201 }
     );
   } catch (error) {
